@@ -73,9 +73,9 @@ class TimeLinkGetImage(Base, BaseRepr):
     __tablename__ = "timelinkgetimage"
     id = Column(Integer, primary_key=True)
     link = Column(String)
-    link_image = Column(String)
+    # image = Column(String)
     time_delete = Column(DateTime)
 
 Base.metadata.bind = engine
-# Base.metadata.drop_all(bind=engine)
+Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)

@@ -1,3 +1,5 @@
+from email.utils import localtime
+import time
 import fastapi
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import sessionmaker
@@ -23,7 +25,7 @@ user_profile_setting = 'name email '.split(' ')
 app = fastapi.FastAPI()
 
 _hash = lambda x : hashlib.md5((x).encode()).hexdigest()
-_image = lambda j : " ".join(map(lambda x: str(x), j))
+local_time = time.ctime(time.time())
 
 # Проверка пользователя
 def check_user(_app):
@@ -73,6 +75,7 @@ async def upload_image_profile(session: str, file: fastapi.UploadFile = fastapi.
 
 @app.post('/registed', response_model=SessionModel)
 def registed(_app: RegistedModel):
+    print("Local time:", local_time)
     print(_app)
     locked(
         conditions=DB.get(Auth, Auth.email, _app.email) is not None,
@@ -88,7 +91,7 @@ def registed(_app: RegistedModel):
 @app.post('/login', response_model=SessionModel)
 def login(_app: AuthorizationModel):
     user = DB.get(Auth, Auth.email, _app.email)
-
+    print("Local time:", local_time)
     print(_app)
     unauthorized(
         conditions=user is None,
@@ -102,6 +105,7 @@ def login(_app: AuthorizationModel):
 @app.post('/add_task', response_model=IDResultModel)
 def add_task(_app: AddTaskModel):
     user_session = check_user(_app)
+    print("Local time:", local_time)
     print(_app)
     
     try:
@@ -129,6 +133,7 @@ def add_task(_app: AddTaskModel):
 
 @app.post('/get_task', response_model=ListResultModel)
 def get_task(_app: GetTaskModel):
+    print("Local time:", local_time)
     print(_app)
     user_session = check_user(_app)
 
@@ -157,6 +162,7 @@ def get_task(_app: GetTaskModel):
 
 @app.post('/add_bigtask', response_model=IDResultModel) #замутить чтот
 def add_bigtask(_app:AddBigTaskModel):
+    print("Local time:", local_time)
     print(_app)
     user_session = check_user(_app)
 
@@ -167,6 +173,7 @@ def add_bigtask(_app:AddBigTaskModel):
 
 @app.post('/get_bigtask', response_model=ListResultModel)
 def get_bigtask(_app:GetBigTaskModel):
+    print("Local time:", local_time)
     print(_app)
     user_session = check_user(_app)
     
@@ -176,6 +183,7 @@ def get_bigtask(_app:GetBigTaskModel):
 
 @app.post('/complite_task')
 def complite_task(_app:CompletedModel):
+    print("Local time:", local_time)
     print(_app)
     user_session = check_user(_app)
 
@@ -197,6 +205,7 @@ def complite_task(_app:CompletedModel):
 
 @app.post('/get_statictic', response_model=ResultStatisticModel)
 def statistic(_app:StatisticModel):
+    print("Local time:", local_time)
     print(_app)
     user_session = check_user(_app)
 
@@ -216,6 +225,7 @@ def statistic(_app:StatisticModel):
 
 @app.post('/get_statistic_big_task', response_model=ResultStatisticBigTaskModel)
 def statistic_big_task(_app:StatisticBigTaskModel):
+    print("Local time:", local_time)
     print(_app)
     user_session = check_user(_app)
 
@@ -238,6 +248,7 @@ def statistic_big_task(_app:StatisticBigTaskModel):
 
 @app.post('/get_profile', response_model=UserResultModel)
 def get_profile(_app:SessionModel):
+    print("Local time:", local_time)
     print(_app)
     user_session = check_user(_app)
 
@@ -255,6 +266,7 @@ def get_profile(_app:SessionModel):
 
 @app.post('/edit_profile')
 def edit_profile(_app:UserModel):
+    print("Local time:", local_time)
     print(_app)
     user_session = check_user(_app)
 

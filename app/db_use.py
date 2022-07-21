@@ -79,9 +79,9 @@ class DBActivate():
                 tasks.append({"id": i.id, "tasks": i.task, "date": i.date, "image": "None", "name_big_task": "None", "icon": "None", "big_task_id": i.big_task_id, "completed": db_table_comp.completed})
             else:
                 link = str(uuid4().hex)
-                db = TimeLinkGetImage(link=link, image=image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
+                db = TimeLinkGetImage(link=link, image=db_table_big.image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
                 link = link + _hash(db.id)
-                db = TimeLinkGetImage(link=link, image=image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
+                db = TimeLinkGetImage(link=link, image=db_table_big.image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
 
                 session.add(db)
                 session.commit()
@@ -107,9 +107,9 @@ class DBActivate():
                 statistic.append({"date": j.date, "completed": j.completed})
 
             link = str(uuid4().hex)
-            db = TimeLinkGetImage(link=link, image=image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
+            db = TimeLinkGetImage(link=link, image=db_table_bigtask.image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
             link = link + _hash(db.id)
-            db = TimeLinkGetImage(link=link, image=image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
+            db = TimeLinkGetImage(link=link, image=db_table_bigtask.image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
 
             session.add(db)
             session.commit()
