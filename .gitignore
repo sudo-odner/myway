@@ -1,4 +1,7 @@
 .vscode
 venv
 .DS_Store
-app/image/big_task/
+app/image/big_task/*.png
+app/image/big_task/*.jpeg
+app/image/user/*.png
+app/image/user/*.jpeg
