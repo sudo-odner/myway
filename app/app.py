@@ -2,7 +2,7 @@ import fastapi
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import sessionmaker
 
-from app.model.model import SessionModel, UserModel,  AuthorizationModel, RegistedModel,  CompletedModel
+from app.model.model import SessionModel, UserModel,  AuthorizationModel, RegistedModel,  CompletedModel, UserResultModel
 from app.model.task import AddBigTaskModel, AddTaskModel, GetBigTaskModel, GetTaskModel, IDResultModel, ListResultModel
 from app.model.statistic import StatisticModel, ResultStatisticModel, StatisticBigTaskModel, ResultStatisticBigTaskModel
 
@@ -68,13 +68,12 @@ async def upload_image_profile(session: str, file: fastapi.UploadFile = fastapi.
         shutil.copyfileobj(file.file, buffer)
     
     DB.add_image(Auth, Auth.id, user_session.user_id, f"./app/image/user/{user_session.user_id}.jpeg")
-    # return {description: 1}
 
     return {"message": True}
 
 @app.post('/registed', response_model=SessionModel)
 def registed(_app: RegistedModel):
-
+    print(_app)
     locked(
         conditions=DB.get(Auth, Auth.email, _app.email) is not None,
         detail="Login is registed")
@@ -130,6 +129,7 @@ def add_task(_app: AddTaskModel):
 
 @app.post('/get_task', response_model=ListResultModel)
 def get_task(_app: GetTaskModel):
+    print(_app)
     user_session = check_user(_app)
 
     date_start, date_end = datetime.date(1, 1, 1), datetime.date(9999, 1, 1)
@@ -157,6 +157,7 @@ def get_task(_app: GetTaskModel):
 
 @app.post('/add_bigtask', response_model=IDResultModel) #замутить чтот
 def add_bigtask(_app:AddBigTaskModel):
+    print(_app)
     user_session = check_user(_app)
 
     id_big_task = BigTask(user_id=user_session.user_id, name=_app.name, icon=_app.icon)
@@ -166,6 +167,7 @@ def add_bigtask(_app:AddBigTaskModel):
 
 @app.post('/get_bigtask', response_model=ListResultModel)
 def get_bigtask(_app:GetBigTaskModel):
+    print(_app)
     user_session = check_user(_app)
     
     tasks = DB.get_bigtask(user_session.user_id, _app.goal)
@@ -174,6 +176,7 @@ def get_bigtask(_app:GetBigTaskModel):
 
 @app.post('/complite_task')
 def complite_task(_app:CompletedModel):
+    print(_app)
     user_session = check_user(_app)
 
     forbidden(
@@ -189,11 +192,12 @@ def complite_task(_app:CompletedModel):
         DB.edit_complete_task(Completed_bigtask, Completed_bigtask.task_id, _app.id_task)
 
     DB.edit_complete_task(Completed_all, Completed_all.task_id, _app.id_task)
-    return {"Out" : True}
+    return {"message": True}
 
 
 @app.post('/get_statictic', response_model=ResultStatisticModel)
 def statistic(_app:StatisticModel):
+    print(_app)
     user_session = check_user(_app)
 
     completed_bigtask = DB.set_statistic_copm(Completed_bigtask, Completed_bigtask.user_id, user_session.user_id)
@@ -212,6 +216,7 @@ def statistic(_app:StatisticModel):
 
 @app.post('/get_statistic_big_task', response_model=ResultStatisticBigTaskModel)
 def statistic_big_task(_app:StatisticBigTaskModel):
+    print(_app)
     user_session = check_user(_app)
 
     forbidden(
@@ -231,8 +236,9 @@ def statistic_big_task(_app:StatisticBigTaskModel):
         all_bigtask=all_bigtask)
 
 
-@app.post('/get_profile')
+@app.post('/get_profile', response_model=UserResultModel)
 def get_profile(_app:SessionModel):
+    print(_app)
     user_session = check_user(_app)
 
     user = DB.get(Auth, Auth.id, user_session.user_id)
@@ -244,10 +250,12 @@ def get_profile(_app:SessionModel):
             out[i] = DB.getlinkimage(data)
         else:
             out[i] = data
-    return out
+
+    return UserResultModel(**out)
 
 @app.post('/edit_profile')
 def edit_profile(_app:UserModel):
+    print(_app)
     user_session = check_user(_app)
 
     for key in _app.edit:
@@ -257,7 +265,7 @@ def edit_profile(_app:UserModel):
     
     user = DB.edit_profile_db(Auth, Auth.id, user_session.user_id, **(_app.edit))
 
-    return {'Out': True}
+    return {"message": True}
 
 @app.get("/image")
 async def get_image(link: str):

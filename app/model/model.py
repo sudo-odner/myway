@@ -23,3 +23,8 @@ class UserModel(SessionModel):
 # Завершение цели
 class CompletedModel(SessionModel):
     id_task: int
+
+class UserResultModel(BaseModel):
+    image: str
+    email: str
+    name: str
