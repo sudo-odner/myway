@@ -16,7 +16,6 @@ class AddTaskModel(SessionModel):
 class AddBigTaskModel(SessionModel):
     name: str
     icon: str
-    image: list
 
 class GetTaskModel(SessionModel):
     date_start: str
