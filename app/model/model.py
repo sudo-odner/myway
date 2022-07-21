@@ -10,19 +10,15 @@ class UserModel(BaseModel):
 
 # Авторизаци и регистрация пользователя
 class AuthorizationModel(BaseModel):
-    login: str
+    email: str
     password: str
 
 class RegistedModel(UserModel):
-    login: str
     password: str
 
 # Редактирование пользователя
 class UserModel(SessionModel):
     edit: dict
-
-class UserResultModel(UserModel):
-    pass
 
 # Завершение цели
 class CompletedModel(SessionModel):

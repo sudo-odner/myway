@@ -20,7 +20,6 @@ Base = declarative_base()
 class Auth(Base, BaseRepr):
     __tablename__ = 'auth'
     id = Column(Integer, primary_key=True)
-    login = Column(String)
     hashpass = Column(String)
     salt = Column(String)
     name = Column(String)

@@ -52,11 +52,11 @@ class DBActivate():
         return _session_
         
     @DBdecorator
-    def new_user(login, password, name, email, image="None", session=None):
+    def new_user(email, password, name, image="None", session=None):
         _salt = ''.join(random.choice(string.ascii_letters) for x in range(30))
         _hashpass = _hash(password + _salt)
 
-        db_table = Auth(login=login, hashpass=_hashpass, salt=_salt, name=name, email=email, image=image)
+        db_table = Auth(email=email, hashpass=_hashpass, salt=_salt, name=name, image=image)
         session.add(db_table)
         session.commit()
         return db_table.id

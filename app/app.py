@@ -2,7 +2,7 @@ import fastapi
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import sessionmaker
 
-from app.model.model import SessionModel, UserModel, UserResultModel, AuthorizationModel, RegistedModel,  CompletedModel
+from app.model.model import SessionModel, UserModel,  AuthorizationModel, RegistedModel,  CompletedModel
 from app.model.task import AddBigTaskModel, AddTaskModel, GetBigTaskModel, GetTaskModel, IDResultModel, ListResultModel
 from app.model.statistic import StatisticModel, ResultStatisticModel, StatisticBigTaskModel, ResultStatisticBigTaskModel
 
@@ -76,19 +76,19 @@ async def upload_image_profile(session: str, file: fastapi.UploadFile = fastapi.
 def registed(_app: RegistedModel):
 
     locked(
-        conditions=DB.get(Auth, Auth.login, _app.login) is not None,
+        conditions=DB.get(Auth, Auth.email, _app.email) is not None,
         detail="Login is registed")
     not_acceptable(
         conditions= not bool(re.search(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", _app.email)),
         detail="Email is not corect")
     
-    user = DB.new_user(login=_app.login, password=_app.password, name=_app.name, email=_app.email)
+    user = DB.new_user(email=_app.email, password=_app.password, name=_app.name)
 
     return SessionModel(session=DB.new_session(user))
 
 @app.post('/login', response_model=SessionModel)
 def login(_app: AuthorizationModel):
-    user = DB.get(Auth, Auth.login, _app.login)
+    user = DB.get(Auth, Auth.email, _app.email)
 
     print(_app)
     unauthorized(
@@ -117,7 +117,7 @@ def add_task(_app: AddTaskModel):
     if _app.bigtask != -1:
         locked(
             conditions=DB.get(BigTask, BigTask.id, _app.bigtask).user_id != user_session.user_id,
-            detail="Login is registed")
+            detail="What?")
 
     task_id = DB.add(Task(user_id=user_session.user_id, task=_app.task, date=date, big_task_id=_app.bigtask, completed=0))
 
