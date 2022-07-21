@@ -81,7 +81,7 @@ class DBActivate():
                 link = str(uuid4().hex)
                 db = TimeLinkGetImage(link=link, image=db_table_big.image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
                 link = link + _hash(db.id)
-                db = TimeLinkGetImage(link=link, image=db_table_big.image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
+                db.link = link
 
                 session.add(db)
                 session.commit()
@@ -109,7 +109,7 @@ class DBActivate():
             link = str(uuid4().hex)
             db = TimeLinkGetImage(link=link, image=db_table_bigtask.image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
             link = link + _hash(db.id)
-            db = TimeLinkGetImage(link=link, image=db_table_bigtask.image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
+            db.link = link
 
             session.add(db)
             session.commit()
@@ -163,7 +163,7 @@ class DBActivate():
         link = str(uuid4().hex)
         db = TimeLinkGetImage(link=link, image=image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
         link = link + _hash(db.id)
-        db = TimeLinkGetImage(link=link, image=image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
+        db.link = link
 
         session.add(db)
         session.commit()
