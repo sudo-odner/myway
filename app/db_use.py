@@ -80,8 +80,6 @@ class DBActivate():
             else:
                 link = str(uuid4().hex)
                 db = TimeLinkGetImage(link=link, image=db_table_big.image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
-                link = link + _hash(db.id)
-                db.link = link
 
                 session.add(db)
                 session.commit()
@@ -107,12 +105,10 @@ class DBActivate():
                 statistic.append({"date": j.date, "completed": j.completed})
 
             link = str(uuid4().hex)
-            db = TimeLinkGetImage(link=link, image=db_table_bigtask.image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
-            link = link + _hash(db.id)
-            db.link = link
-
+            db = TimeLinkGetImage(link=link, image=i.image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
             session.add(db)
             session.commit()
+            print(1)
             bigtask.append({"id": i.id, "image": f"/image?link={link}", "icon": i.icon, "name": i.name, "statistic": statistic})
         return bigtask
     
@@ -162,9 +158,6 @@ class DBActivate():
     def getlinkimage(image, session=None):
         link = str(uuid4().hex)
         db = TimeLinkGetImage(link=link, image=image, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
-        link = link + _hash(db.id)
-        db.link = link
-
         session.add(db)
         session.commit()
         return f"/image?link={link}"

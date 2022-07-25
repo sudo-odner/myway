@@ -10,10 +10,11 @@ engine = create_engine(
     )
 class BaseRepr():
     def __repr__(self):
-        date = self.__dict__
-        date = dict(filter(lambda x: x[0] not in '_sa_instance_state', date.items()))
+        data = self.__dict__
+        print(data)
+        data = dict(filter(lambda x: x[0] not in '_sa_instance_state', data.items()))
         nl_char = '\n'
-        return f"""{nl_char.join([f"{i[0]}: {i[1]}" for i in date.items()])}{nl_char}{nl_char}"""
+        return f"""{nl_char.join([f"{i[0]}: {i[1]}" for i in data.items()])}{nl_char}{nl_char}"""
 
 Base = declarative_base()
 
@@ -73,9 +74,9 @@ class TimeLinkGetImage(Base, BaseRepr):
     __tablename__ = "timelinkgetimage"
     id = Column(Integer, primary_key=True)
     link = Column(String)
-    # image = Column(String)
+    image = Column(String)
     time_delete = Column(DateTime)
 
 Base.metadata.bind = engine
-Base.metadata.drop_all(bind=engine)
+# Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
