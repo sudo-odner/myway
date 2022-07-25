@@ -1,6 +1,8 @@
 import time
 import requests
+print("Enter link:")
+link = input() + "/dell_time_it_up_image"
 
 while True:
-    requests.get('https://316a-80-250-189-177.eu.ngrok.io/dell_time_it_up_image')
+    requests.get(link)
     time.sleep(3600)
