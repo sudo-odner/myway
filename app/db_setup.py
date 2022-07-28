@@ -2,73 +2,73 @@ from sqlalchemy import LargeBinary, create_engine, Column, Integer, String, Floa
 from sqlalchemy.ext.declarative import declarative_base
 
 engine = create_engine(
-    "postgresql://postgres:6236@localhost:5432/myway", 
-
-    execution_options={
-        "isolation_level": "REPEATABLE READ"
-    }
+    "postgresql://postgres:6236@localhost:5432/myway"
     )
+
 class BaseRepr():
     def __repr__(self):
         data = self.__dict__
-        print(data)
         data = dict(filter(lambda x: x[0] not in '_sa_instance_state', data.items()))
-        nl_char = '\n'
-        return f"""{nl_char.join([f"{i[0]}: {i[1]}" for i in data.items()])}{nl_char}{nl_char}"""
+        nl_char = '\n\t'
+        out = list()
+        for item, value in data.items():
+            if item != list(data.keys())[-1]:
+                if type(value) == int:
+                    out.append(f"{item}: {value},")
+                else:
+                    out.append(f"{item}: '{value}',")
+            else:
+                if type(value) == int:
+                    out.append(f"{item}: {value}")
+                else:
+                    out.append(f"{item}: '{value}'")
+
+        return '{\n\t' + nl_char.join(out) + "\n}"
 
 Base = declarative_base()
 
-class Auth(Base, BaseRepr):
-    __tablename__ = 'auth'
+class User(Base, BaseRepr):
+    __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
+    email = Column(String)
     hashpass = Column(String)
     salt = Column(String)
+
     name = Column(String)
-    email = Column(String)
+    birthday = Column(DateTime)
     image = Column(String)
 
-class Auth_session(Base, BaseRepr):
-    __tablename__ = 'auth_session'
+    last_using = Column(DateTime)
+
+class User_session(Base, BaseRepr):
+    __tablename__ = 'user_session'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer)
     session = Column(String)
     last_using = Column(DateTime)
 
+
 class Task(Base, BaseRepr):
     __tablename__ = 'task'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer)
+
+    big_task_id = Column(Integer)
     task = Column(String)
     date = Column(DateTime)
-    big_task_id = Column(Integer)
+
     completed = Column(Integer)
+
 
 class BigTask(Base, BaseRepr):
     __tablename__ = "bigtask"
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer)
-    image = Column(String)
+    
     icon = Column(String)
     name = Column(String)
+    image = Column(String)
 
-class Completed_bigtask(Base, BaseRepr):
-    __tablename__ = "completed_bigtask"
-    id = Column(Integer, primary_key=True)
-    bigtask_id = Column(Integer)
-    user_id = Column(Integer)
-
-    task_id = Column(Integer)
-    date = Column(DateTime)
-    completed = Column(String)
-
-class Completed_all(Base, BaseRepr):
-    __tablename__ = "completed_all"
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer)
-
-    task_id = Column(Integer)
-    date = Column(DateTime)
-    completed = Column(String)
 
 class TimeLinkGetImage(Base, BaseRepr):
     __tablename__ = "timelinkgetimage"
