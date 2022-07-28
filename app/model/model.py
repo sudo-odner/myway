@@ -39,7 +39,9 @@ class RegistedModel(BaseModel):
 
 # Редактирование пользователя
 class UserModel(SessionModel):
-    edit: dict
+    email: EmailStr = None
+    birthday: DateModel = None
+    name: str = None
 
 class UserResultModel(BaseModel):
     image: str

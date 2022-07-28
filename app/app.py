@@ -47,6 +47,7 @@ def get_statistic(data):
     return list(map(lambda kwargs: DayStatistic(**kwargs), statistic))
 
 def print_element(data):
+    print("Local time:", local_time)
     nl_char = '\n\t'
     out = list()
     for item, value in data.items():
@@ -84,9 +85,9 @@ async def upload_image_profile(session: str, file: fastapi.UploadFile = fastapi.
 
     return MessengTrue(message=True)
 
+
 @app.post('/registed', response_model=SessionModel)
 def registed(_app: RegistedModel):
-    print("Local time:", local_time)
     print_element(_app.__dict__)  # ------------удалить на реализации------------
 
     if DB.get_first_filter(User, search=(User.email == _app.email))is not None:
@@ -97,9 +98,9 @@ def registed(_app: RegistedModel):
 
     return SessionModel(session=DB.new_session(user))
 
+
 @app.post('/authorization', response_model=SessionModel)
 def authorization(email: str, password: str):
-    print("Local time:", local_time)
     print_element(vars()) # ------------удалить на реализации------------
 
     user = DB.get_first_filter_by(User, email=email)
@@ -128,7 +129,6 @@ def check_user(session):
 
 @app.post('/add-task', response_model=IDResultModel)
 def add_task(_app: AddTaskModel):
-    print("Local time:", local_time)
     print_element(_app.__dict__)  # ------------удалить на реализации------------
 
     user_session = check_user(_app.session)
@@ -146,7 +146,6 @@ def add_task(_app: AddTaskModel):
 
 @app.post('/get-task', response_model=ListTaskResult) # добавить красоту Кириллу
 def get_task(_app: GetTaskModel):
-    print("Local time:", local_time)
     print_element(_app.__dict__)  # ------------удалить на реализации------------
 
     user_session = check_user(_app.session)
@@ -160,7 +159,6 @@ def get_task(_app: GetTaskModel):
 
 @app.delete('/delete-task', response_model=MessengTrue)
 def delete_task(session: str, id: int):
-    print("Local time:", local_time)
     print_element(vars()) # ------------удалить на реализации------------
 
     user_session = check_user(session)
@@ -177,6 +175,7 @@ def delete_task(session: str, id: int):
 @app.put("/upload-big-task", response_model=MessengTrue)
 async def upload_big_task(session: str, id: str, file: fastapi.UploadFile = fastapi.File(...)): # пошпрехать с Кириллом на чёт получение типа файлв
     user_session = check_user(session)
+
     if user_session is None:
         raise HTTPException(status_code=401, detail="Session is not exists")
     if user_session.user_id != (DB.get_first_filter_by(BigTask, id=id)).user_id:
@@ -193,7 +192,6 @@ async def upload_big_task(session: str, id: str, file: fastapi.UploadFile = fast
 
 @app.post('/add_bigtask', response_model=IDResultModel) #замутить чтот
 def add_bigtask(_app:AddBigTaskModel):
-    print("Local time:", local_time)
     print_element(_app.__dict__)  # ------------удалить на реализации------------
     user_session = check_user(_app.session)
 
@@ -204,7 +202,6 @@ def add_bigtask(_app:AddBigTaskModel):
 
 @app.post('/get-bigtask', response_model=ListBigTaskResult)
 def get_bigtask(session: str, id: int):
-    print("Local time:", local_time)
     print_element(vars()) # ------------удалить на реализации------------
     user_session = check_user(session)
     
@@ -214,7 +211,6 @@ def get_bigtask(session: str, id: int):
 
 @app.delete('/delete-bigtask', response_model=MessengTrue) # сделать защиту от связаных тасков
 def delete_bigtask(session: str, id: int):
-    print("Local time:", local_time)
     print_element(vars()) # ------------удалить на реализации------------
     user_session = check_user(session)
 
@@ -229,7 +225,6 @@ def delete_bigtask(session: str, id: int):
 
 @app.put('/complite-task', response_model=MessengTrue)
 def complite_task(session: str, id: int):
-    print("Local time:", local_time)
     print_element(vars()) # ------------удалить на реализации------------
     user_session = check_user(session)
 
@@ -245,7 +240,6 @@ def complite_task(session: str, id: int):
 
 @app.post('/get-statictic', response_model=StatisticResult)
 def statistic(session: str):
-    print("Local time:", local_time)
     print_element(vars()) # ------------удалить на реализации------------
     user_session = check_user(session)
 
@@ -260,7 +254,6 @@ def statistic(session: str):
 
 @app.post('/get-statistic-one-big-task', response_model=OneBigTaskStatistic)
 def statistic_big_task(session: str, id: int):
-    print("Local time:", local_time)
     print_element(vars()) # ------------удалить на реализации------------
     user_session = check_user(session)
 
@@ -276,9 +269,8 @@ def statistic_big_task(session: str, id: int):
 
 
 
-@app.post('/get_profile', response_model=UserResultModel) # Не нравитьсяя мне это 
+@app.post('/get_profile', response_model=UserResultModel) # Не нравитьсяя мне это но норм
 def get_profile(session: str):
-    print("Local time:", local_time)
     print_element(vars()) # ------------удалить на реализации------------
     user_session = check_user(session)
 
@@ -301,17 +293,20 @@ def get_profile(session: str):
     return UserResultModel(**out)
 
 
-@app.put('/edit_profile', response_model=MessengTrue) # Не нравитьсяя мне это 
+@app.put('/edit_profile', response_model=MessengTrue) # Не нравитьсяя мне это норм
 def edit_profile(_app:UserModel):
-    print("Local time:", local_time)
     print_element(_app.__dict__)  # ------------удалить на реализации------------
     user_session = check_user(_app.session)
 
-    for key in _app.edit:
-        if key not in ['name', 'email', 'birthday'] and key != 'image':
-            HTTPException(status_code=400, detail="Wrong filling")
+    edit = dict()
+    for item in _app.__dict__.items():
+        if item is not None:
+            if item[0] == 'birthday':
+                edit[item[0]] = str(item[1])
+            else:
+                edit[item[0]] = item[1]
 
-    user = DB.update(User, reload=_app.edit, id=user_session.user_id)
+    user = DB.update(User, search=(User.id == user_session.user_id), reload=edit)
     return MessengTrue(message=True)
 
 

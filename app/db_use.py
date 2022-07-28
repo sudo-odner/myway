@@ -170,7 +170,7 @@ class DBActivate():
                     big_task_id=i.big_task_id,
                     completed=i.completed
                 ))
-        print(tasks)
+
         return tasks
     @DBdecorator
     def get_bigtask(idd, goal, session=None):
@@ -202,6 +202,5 @@ class DBActivate():
                     name=item.name,
                     statistic=statistic
                     ))
-
 
         return bigtask
