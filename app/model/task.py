@@ -83,6 +83,7 @@ class AddTaskModel(SessionModel):
     class Config:
         schema_extra = {
             "example": {
+                "session": "Enter your session",
                 "task": "Pet the cat",
                 "date": {
                     "year": 2005,
@@ -90,7 +91,7 @@ class AddTaskModel(SessionModel):
                     "day": 18,
                     "hours": 12,
                     "minute": 1},
-                "big_task": -1
+                "bigtask": -1
             }
         }
 

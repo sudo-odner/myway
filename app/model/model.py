@@ -5,7 +5,7 @@ class SessionModel(BaseModel):
     session: str
 
 class MessengTrue(BaseModel):
-    messenge: bool
+    message: bool
 
 class DateModel(BaseModel):
     year: int = 1

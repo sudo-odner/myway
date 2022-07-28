@@ -28,7 +28,7 @@ class BaseRepr():
 Base = declarative_base()
 
 class User(Base, BaseRepr):
-    __tablename__ = 'auth'
+    __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
     email = Column(String)
     hashpass = Column(String)
@@ -41,7 +41,7 @@ class User(Base, BaseRepr):
     last_using = Column(DateTime)
 
 class User_session(Base, BaseRepr):
-    __tablename__ = 'auth_session'
+    __tablename__ = 'user_session'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer)
     session = Column(String)

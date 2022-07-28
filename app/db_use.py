@@ -34,8 +34,8 @@ def get_statistic(data):
 
 def add_linc_to_imag(file):
     link = str(uuid4().hex)
-    db = TimeLinkGetImage(link=link, file=file, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
-    link = link + _hash(db.id)
+    db = TimeLinkGetImage(link=link, image=file, time_delete=(datetime.datetime.now() + datetime.timedelta(minutes=60)))
+    link = link + _hash(str(db.id))
     db.link = link
 
     return db
@@ -70,16 +70,16 @@ class DBActivate():
         return session.query(db_table).filter_by(**_search).all()
     
     @DBdecorator
-    def get_all_filter(db_table, session=None, _search=()):
-        return session.query(db_table).filter(*_search).all()
+    def get_all_filter(db_table, session=None, search=()):
+        return session.query(db_table).filter(search).all()
     
     @DBdecorator
-    def get_all_filter(db_table, session=None, _search=()):
-        return session.query(db_table).filter(*_search).first()
+    def get_first_filter(db_table, session=None, search=()):
+        return session.query(db_table).filter(search).first()
     
     @DBdecorator
-    def update(db_table, reload={}, session=None, **_search):
-        session.query(db_table).filter(**_search).update(reload)
+    def update(db_table, reload={}, session=None, search=()):
+        session.query(db_table).filter(search).update(reload)
         session.commit()
     
     @DBdecorator
@@ -89,8 +89,8 @@ class DBActivate():
         return db_table.id
     
     @DBdecorator
-    def dell(db_table, session=None, _search=()):
-        db_list = session.query(db_table).filter(*_search).all()
+    def dell(db_table, session=None, search=()):
+        db_list = session.query(db_table).filter(search).all()
         for db in db_list:
             session.delete(db)
         session.commit()
@@ -114,22 +114,25 @@ class DBActivate():
         db_user = session.query(User).filter_by( id=user_id ).first()
         db_user.last_using = datetime.datetime.now(datetime.timezone.utc)
         session.commit()
+
         return _session_
         
     @DBdecorator
-    def new_user(email, password, name, image="None", session=None):
+    def new_user(email, password, name, birthday, session=None):
         _salt = ''.join(random.choice(string.ascii_letters) for x in range(30))
         _hashpass = _hash(password + _salt)
 
-        db_table = User(email=email, hashpass=_hashpass, salt=_salt, name=name, image=image)
+        db_table = User(email=email, hashpass=_hashpass, salt=_salt, name=name, birthday=birthday)
+
         session.add(db_table)
         session.commit()
+
         return db_table.id
     
     @DBdecorator
     def using_app(user_session, session=None):
         db_user = session.query(User).filter_by( id=user_session.user_id ).first()
-        db_session = session.query(User_session).filter_by( session=user_session.id ).first()
+        db_session = session.query(User_session).filter_by( session=user_session.session ).first()
         db_user.last_using = datetime.datetime.now(datetime.timezone.utc)
         db_session.last_using = datetime.datetime.now(datetime.timezone.utc)
         session.commit()    
@@ -139,31 +142,35 @@ class DBActivate():
     @DBdecorator
     def get_task(idd, date_start, date_end, session=None):
         db_table = session.query(Task).filter(Task.user_id == idd, date_start <= Task.date, Task.date <= date_end).all()
-
         tasks = []
         for i in db_table:
             db_table_big = session.query(BigTask).filter(BigTask.id == i.big_task_id).first()
+
             if i.big_task_id == -1:
-                TaskResult(
-                    id=i.id,
-                    task=i.task,
-                    date=i.date,
-                    completed=db_table.completed
-                )
-            else:
-                db = add_linc_to_imag(db_table_big.image)
-                session.add(db)
-                session.commit()
                 tasks.append(TaskResult(
                     id=i.id,
                     task=i.task,
-                    date=i.date,
+                    date=str(i.date),
+                    completed=i.completed
+                ))
+            else:
+                print(1)
+                print(db_table_big.image)
+                db = add_linc_to_imag(db_table_big.image)
+                session.add(db)
+                session.commit()
+                print(2)
+                tasks.append(TaskResult(
+                    id=i.id,
+                    task=i.task,
+                    date=str(i.date),
                     image=f"/download-file?link={db.link}",
                     name_big_task=db_table_big.name,
                     icon=db_table_big.icon,
                     big_task_id=i.big_task_id,
-                    completed=db_table.completed
+                    completed=i.completed
                 ))
+        print(tasks)
         return tasks
     @DBdecorator
     def get_bigtask(idd, goal, session=None):
@@ -175,16 +182,26 @@ class DBActivate():
         bigtask = []
         for item in db_table_bigtask:
             statistic = get_statistic(session.query(Task).filter(Task.id == item.id).all())
+            if item.image is not None:
+                db = add_linc_to_imag(db_table_bigtask.image)
+                session.add(db)
+                session.commit()
 
-            db = add_linc_to_imag(db_table_bigtask.image)
-            session.add(db)
-            session.commit()
+                bigtask.append(BigTaskResult( 
+                    id=item.id,
+                    image=f"/download-file?link={db.link}",
+                    icon=item.icon,
+                    name=item.name,
+                    statistic=statistic
+                    ))
+            else:
+                bigtask.append(BigTaskResult( 
+                    id=item.id,
+                    image="None",
+                    icon=item.icon,
+                    name=item.name,
+                    statistic=statistic
+                    ))
 
-            BigTaskResult( 
-                id=item.id,
-                image=f"/download-file?link={db.link}",
-                icon=item.icon,
-                name=item.name,
-                statistic=statistic)
 
         return bigtask
