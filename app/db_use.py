@@ -182,8 +182,9 @@ class DBActivate():
         bigtask = []
         for item in db_table_bigtask:
             statistic = get_statistic(session.query(Task).filter(Task.id == item.id).all())
+
             if item.image is not None:
-                db = add_linc_to_imag(db_table_bigtask.image)
+                db = add_linc_to_imag(item.image)
                 session.add(db)
                 session.commit()
 

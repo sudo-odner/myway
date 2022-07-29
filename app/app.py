@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker
 
-from app.model.model import MessengTrue, SessionModel, UserModel, RegistedModel, UserResultModel
+from app.model.model import MessengTrue, RuthorizationModel, SessionAndID, SessionModel, UserModel, RegistedModel, UserResultModel
 from app.model.task import AddBigTaskModel, AddTaskModel, GetTaskModel, IDResultModel, ListBigTaskResult, ListTaskResult
 from app.model.statistic import DayStatistic, OneBigTaskStatistic, StatisticResult
 
@@ -69,14 +69,14 @@ def print_element(data):
 DBSession = sessionmaker(engine)
 DB = DBActivate(DBSession)
 
-
+# Проверк 
 @app.put("/upload_image_profile", response_model=MessengTrue)
-async def upload_image_profile(session: str, file: fastapi.UploadFile = fastapi.File(...)):
+async def upload_image_profile(session: str, content_type: str, file: fastapi.UploadFile = fastapi.File(...)):
     user_session = DB.get_first_filter(User_session, search=(User_session.session == session))
     if user_session is None:
         raise HTTPException(status_code=401, detail="Session is not exists")
     
-    way = f"./app/image/user/{user_session.user_id}.{file_type(file)}"
+    way = f"./app/image/user/{user_session.user_id}.{content_type}"
 
     with open(way, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
@@ -100,14 +100,14 @@ def registed(_app: RegistedModel):
 
 
 @app.post('/authorization', response_model=SessionModel)
-def authorization(email: str, password: str):
-    print_element(vars()) # ------------удалить на реализации------------
+def authorization(_app: RuthorizationModel):
+    print_element(_app.__dict__)  # ------------удалить на реализации------------
 
-    user = DB.get_first_filter_by(User, email=email)
+    user = DB.get_first_filter_by(User, email=_app.email)
     if user is None:
         raise HTTPException(status_code=401, detail="Login not found")
     
-    if _hash(password + user.salt) != user.hashpass:
+    if _hash(_app.password + user.salt) != user.hashpass:
         raise HTTPException(status_code=423, detail="Login is registed")
     
     return SessionModel(session=DB.new_session(user.id))
@@ -158,22 +158,22 @@ def get_task(_app: GetTaskModel):
     return ListTaskResult(list_result=tasks)
 
 @app.delete('/delete-task', response_model=MessengTrue)
-def delete_task(session: str, id: int):
-    print_element(vars()) # ------------удалить на реализации------------
+def delete_task(_app: SessionAndID):
+    print_element(_app.__dict__)  # ------------удалить на реализации------------
 
-    user_session = check_user(session)
+    user_session = check_user(_app.session)
 
-    if DB.get_first_filter(Task, search=(and_(Task.user_id == user_session.user_id, Task.completed == 0, Task.id == id))) == None:
+    if DB.get_first_filter(Task, search=(and_(Task.user_id == user_session.user_id, Task.completed == 0, Task.id == _app.id))) == None:
         raise HTTPException(status_code=403, detail="The task has already been completed or it has not been set")
     
-    DB.dell(Task, search=(Task.id == id))
+    DB.dell(Task, search=(Task.id == _app.id))
     return MessengTrue(message=True)
 
 
 
 
 @app.put("/upload-big-task", response_model=MessengTrue)
-async def upload_big_task(session: str, id: str, file: fastapi.UploadFile = fastapi.File(...)): # пошпрехать с Кириллом на чёт получение типа файлв
+async def upload_big_task(session: str, id: str, content_type: str, file: fastapi.UploadFile = fastapi.File(...)): # пошпрехать с Кириллом на чёт получение типа файлв
     user_session = check_user(session)
 
     if user_session is None:
@@ -181,7 +181,7 @@ async def upload_big_task(session: str, id: str, file: fastapi.UploadFile = fast
     if user_session.user_id != (DB.get_first_filter_by(BigTask, id=id)).user_id:
         raise HTTPException(status_code=423, deteil="The user does not have access to this big target")
     
-    way = f"./app/image/big_task/{id}.{file_type(file)}"
+    way = f"./app/image/big_task/{id}.{content_type}"
 
     with open( way, "wb") as buffer: #
         shutil.copyfileobj(file.file, buffer)
@@ -201,38 +201,39 @@ def add_bigtask(_app:AddBigTaskModel):
 
 
 @app.post('/get-bigtask', response_model=ListBigTaskResult)
-def get_bigtask(session: str, id: int):
-    print_element(vars()) # ------------удалить на реализации------------
-    user_session = check_user(session)
+def get_bigtask(_app: SessionAndID):
+    print_element(_app.__dict__)  # ------------удалить на реализации------------
+    user_session = check_user(_app.session)
     
-    big_tasks = DB.get_bigtask(user_session.user_id, id)
+    big_tasks = DB.get_bigtask(user_session.user_id, _app.id)
+    print(big_tasks)
     return ListBigTaskResult(list_result=big_tasks)
 
 
 @app.delete('/delete-bigtask', response_model=MessengTrue) # сделать защиту от связаных тасков
-def delete_bigtask(session: str, id: int):
-    print_element(vars()) # ------------удалить на реализации------------
-    user_session = check_user(session)
+def delete_bigtask(_app: SessionAndID):
+    print_element(_app.__dict__)  # ------------удалить на реализации------------
+    user_session = check_user(_app.session)
 
-    if DB.get_first_filter(BigTask, search=(and_(BigTask.id == id, BigTask.user_id == user_session.user_id))) == None:
+    if DB.get_first_filter(BigTask, search=(and_(BigTask.id ==_app.id, BigTask.user_id == user_session.user_id))) == None:
         raise HTTPException(status_code=403, detail="No such big goal or no access to it")
 
-    DB.dell(BigTask, search=(BigTask.id == id))
+    DB.dell(BigTask, search=(BigTask.id == _app.id))
     return MessengTrue(message=True)
 
 
 
 
 @app.put('/complite-task', response_model=MessengTrue)
-def complite_task(session: str, id: int):
-    print_element(vars()) # ------------удалить на реализации------------
-    user_session = check_user(session)
+def complite_task(_app: SessionAndID):
+    print_element(_app.__dict__)  # ------------удалить на реализации------------
+    user_session = check_user(_app.session)
 
 
-    if DB.get_first_filter(Task, search=(and_(Task.id == id, Task.user_id == user_session.user_id))) is None:
+    if DB.get_first_filter(Task, search=(and_(Task.id == _app.id, Task.user_id == user_session.user_id))) is None:
         raise HTTPException(status_code=403, detail="There is no such task or there is no access to it") # Такой задачи нет или к ней нет доступа
     
-    DB.update(Task, search=(and_(Task.id == id, Task.user_id == user_session.user_id)), reload={"completed": 1})
+    DB.update(Task, search=(and_(Task.id == _app.id, Task.user_id == user_session.user_id)), reload={"completed": 1})
     return MessengTrue(message=True)
 
 
@@ -253,14 +254,14 @@ def statistic(session: str):
 
 
 @app.post('/get-statistic-one-big-task', response_model=OneBigTaskStatistic)
-def statistic_big_task(session: str, id: int):
+def statistic_big_task(_app: SessionAndID):
     print_element(vars()) # ------------удалить на реализации------------
-    user_session = check_user(session)
+    user_session = check_user(_app.session)
 
-    if DB.get_first_filter(BigTask, search=(and_(BigTask.id == id, BigTask.user_id == user_session.user_id))) is None:
+    if DB.get_first_filter(BigTask, search=(and_(BigTask.id == _app.id, BigTask.user_id == user_session.user_id))) is None:
         return HTTPException(status_code=403, detail="There is no or no access to such a big goal")
 
-    one_bigtask_statistic = get_statistic(DB.get_all_filter(Task, search=(and_(Task.user_id == user_session.user_id, Task.big_task_id == id))))
+    one_bigtask_statistic = get_statistic(DB.get_all_filter(Task, search=(and_(Task.user_id == user_session.user_id, Task.big_task_id == _app.id))))
 
     return OneBigTaskStatistic(
         list_result=one_bigtask_statistic
@@ -318,7 +319,6 @@ async def download_file(link: str):
     DB.dell(TimeLinkGetImage, search=(TimeLinkGetImage.link == link))
     return FileResponse(link_image)
 
-@app.get("/dell_time_it_up_image")
+@app.get("/dell-time-it-up-image")
 async def dell_time_it_up_image():
     DB.dell(TimeLinkGetImage, search=(TimeLinkGetImage.time_delete >= datetime.datetime.now(datetime.timezone.utc)))
-    DB.dellallimage()

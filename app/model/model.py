@@ -1,5 +1,6 @@
 from typing import List
 from pydantic import BaseModel, EmailStr
+from requests import session
 
 class SessionModel(BaseModel):
     session: str
@@ -20,6 +21,10 @@ class RegistedModel(BaseModel):
     name: str
     email: EmailStr
     birthday: DateModel
+    password: str
+
+class RuthorizationModel(BaseModel):
+    email: EmailStr
     password: str
 
 
@@ -58,3 +63,7 @@ class UserResultModel(BaseModel):
                 "name": "kirill"
             }
         }
+    
+class SessionAndID(BaseModel):
+    session: str
+    id: int
