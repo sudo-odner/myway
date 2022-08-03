@@ -69,7 +69,7 @@ def print_element(data):
 DBSession = sessionmaker(engine)
 DB = DBActivate(DBSession)
 
-# Проверк 
+# Проверку go
 @app.put("/upload_image_profile", response_model=MessengTrue)
 async def upload_image_profile(session: str, content_type: str, file: fastapi.UploadFile = fastapi.File(...)):
     user_session = DB.get_first_filter(User_session, search=(User_session.session == session))
