@@ -1,5 +1,4 @@
 import time
-from charset_normalizer import detect
 import fastapi
 from fastapi import HTTPException
 from fastapi.responses import FileResponse
