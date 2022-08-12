@@ -1,4 +1,3 @@
-from email.mime import image
 from uuid import uuid4
 import datetime
 from app.db_setup import Task, BigTask, TimeLinkGetImage, User, User_session
