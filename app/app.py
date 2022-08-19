@@ -75,7 +75,7 @@ async def upload_image_profile(session: str, content_type: str, file: fastapi.Up
     if user_session is None:
         raise HTTPException(status_code=401, detail="Session is not exists")
     
-    way = f"./app/image/user/{user_session.user_id}.{content_type}"
+    way = f"./app/file/user/{user_session.user_id}.{file_type(file)}"
 
     with open(way, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
@@ -180,7 +180,7 @@ async def upload_big_task(session: str, id: str, content_type: str, file: fastap
     if user_session.user_id != (DB.get_first_filter_by(BigTask, id=id)).user_id:
         raise HTTPException(status_code=423, deteil="The user does not have access to this big target")
     
-    way = f"./app/image/big_task/{id}.{content_type}"
+    way = f"./app/file/user/{id}.{file_type(file)}"
 
     with open( way, "wb") as buffer: #
         shutil.copyfileobj(file.file, buffer)
