@@ -1,4 +1,5 @@
 from email.mime import image
+from pyexpat import model
 from uuid import uuid4
 import datetime
 from app.db_setup import Task, BigTask, TimeLinkGetImage, User, User_session
@@ -8,8 +9,10 @@ import hashlib
 import random
 import string
 from app.model.statistic import DayStatistic
+from pydantic import BaseModel
+from app.model.task import BigTaskModel, TaskModel
 
-from app.model.task import BigTaskResult, TaskResult
+from app.model.tasksdf import BigTaskResult, TaskResult
 
 
 _hash = lambda x : hashlib.md5((x).encode()).hexdigest()
@@ -40,11 +43,12 @@ def add_linc_to_imag(file):
 
     return db
 
+
 class DBActivate():
     def __init__(self, session) -> None:
         self.session = session
     
-    def DBdecorator(func):
+    def DBDecorator(func):
         def DBUSe(self, *args, **kwargs):
             result = None
             session = None
@@ -61,63 +65,53 @@ class DBActivate():
             return result
         return DBUSe
     
-    @DBdecorator
-    def get_first_filter_by(db_table, session=None, **_search):
-        return session.query(db_table).filter_by(**_search).first()
-    
-    @DBdecorator
-    def get_all_filter_by(db_table, session=None, **_search):
-        return session.query(db_table).filter_by(**_search).all()
-    
-    @DBdecorator
-    def get_all_filter(db_table, session=None, search=()):
-        return session.query(db_table).filter(search).all()
-    
-    @DBdecorator
+    @DBDecorator
     def get_first_filter(db_table, session=None, search=()):
         return session.query(db_table).filter(search).first()
     
-    @DBdecorator
-    def update(db_table, reload={}, session=None, search=()):
-        session.query(db_table).filter(search).update(reload)
-        session.commit()
+    @DBDecorator
+    def get_all_filter(db_table, session=None, search=()):
+        return session.query(db_table).filter(search).all()
     
-    @DBdecorator
+    @DBDecorator
     def add(db_table, session=None):
         session.add(db_table)
         session.commit()
         return db_table.id
     
-    @DBdecorator
+    @DBDecorator
+    def update(db_table, reload={}, session=None, search=()):
+        session.query(db_table).filter(search).update(reload)
+        session.commit()
+    
+    @DBDecorator
     def dell(db_table, session=None, search=()):
         db_list = session.query(db_table).filter(search).all()
         for db in db_list:
             session.delete(db)
         session.commit()
     
-    @DBdecorator
-    def getlinkimage(image, session=None):
-        db = add_linc_to_imag(image)
+    @DBDecorator
+    def getlinkimage(file, session=None):
+        db = add_linc_to_imag(file)
         session.add(db)
         session.commit()
-        return f"/download-file?link={db.link}"
+        return f"/file?link={db.link}"
 
-    
 
-    @DBdecorator
-    def new_session(user_id, session=None):
+    @DBDecorator
+    def new_session(id, session=None):
         _session_ = uuid4().hex
 
-        session.add(User_session(user_id=user_id, session=_session_, last_using=datetime.datetime.now(datetime.timezone.utc)))
+        date_now = datetime.datetime.now(datetime.timezone.utc)
+        user = User_session(user_id=id, last_using=date_now, session=_session_)
+        session.add(user)
         session.commit()
+        user.id
 
-        db_user = session.query(User).filter_by( id=user_id ).first()
-        db_user.last_using = datetime.datetime.now(datetime.timezone.utc)
-        session.commit()
-
-        return _session_
+        return user
         
-    @DBdecorator
+    @DBDecorator
     def new_user(email, password, name, birthday, session=None):
         _salt = ''.join(random.choice(string.ascii_letters) for x in range(30))
         _hashpass = _hash(password + _salt)
@@ -129,7 +123,7 @@ class DBActivate():
 
         return db_table.id
     
-    @DBdecorator
+    @DBDecorator
     def using_app(user_session, session=None):
         db_user = session.query(User).filter_by( id=user_session.user_id ).first()
         db_session = session.query(User_session).filter_by( session=user_session.session ).first()
@@ -139,69 +133,42 @@ class DBActivate():
     
     
     
-    @DBdecorator
-    def get_task(idd, date_start, date_end, session=None):
-        db_table = session.query(Task).filter(Task.user_id == idd, date_start <= Task.date, Task.date <= date_end).all()
+    @DBDecorator
+    def get_task(id, date_start, date_end, session=None):
+        db_table = session.query(Task).filter(Task.user_id == id, date_start <= Task.date, Task.date <= date_end).all()
         tasks = []
-        for i in db_table:
-            db_table_big = session.query(BigTask).filter(BigTask.id == i.big_task_id).first()
+        for element in db_table:
+            task = TaskModel(id=element.id, name=element.name, date=str(element.date), completed=element.completed)
 
-            if i.big_task_id == -1:
-                tasks.append(TaskResult(
-                    id=i.id,
-                    task=i.task,
-                    date=str(i.date),
-                    completed=i.completed
-                ))
-            else:
-                print(1)
-                print(db_table_big.image)
-                db = add_linc_to_imag(db_table_big.image)
+            bigtask = session.query(BigTask).filter(BigTask.id == element.big_task_id).first()
+            if bigtask != -1:
+                db = add_linc_to_imag(bigtask.filelink)
                 session.add(db)
                 session.commit()
-                print(2)
-                tasks.append(TaskResult(
-                    id=i.id,
-                    task=i.task,
-                    date=str(i.date),
-                    image=f"/download-file?link={db.link}",
-                    name_big_task=db_table_big.name,
-                    icon=db_table_big.icon,
-                    big_task_id=i.big_task_id,
-                    completed=i.completed
-                ))
+
+                task.bigtask = BigTaskModel(id=bigtask.id, icon=bigtask.icon, name=bigtask.name, filelink=f"/file?link={db.link}")
+            
+            tasks.append(task)
 
         return tasks
-    @DBdecorator
-    def get_bigtask(idd, goal, session=None):
+    
+
+    @DBDecorator
+    def get_big_task(id, goal, session=None):
         if goal == -1:
-            db_table_bigtask = session.query(BigTask).filter(BigTask.user_id == idd).all()
+            db_table = session.query(BigTask).filter(BigTask.user_id == id,).all()
         else:
-            db_table_bigtask = session.query(BigTask).filter(BigTask.user_id == idd, BigTask.id == goal).all()
-
-        bigtask = []
-        for item in db_table_bigtask:
-            statistic = get_statistic(session.query(Task).filter(Task.id == item.id).all())
-
-            if item.image is not None:
-                db = add_linc_to_imag(item.image)
+            db_table = session.query(BigTask).filter(BigTask.user_id == id, BigTask.id == goal).first()
+        bigtasks = []
+        for element in db_table:
+            bigtask = BigTaskModel(id=element.id, name=element.name, icon=element.icon)
+            if element.filelink != None:
+                db = add_linc_to_imag(bigtask.filelink)
                 session.add(db)
                 session.commit()
 
-                bigtask.append(BigTaskResult( 
-                    id=item.id,
-                    image=f"/download-file?link={db.link}",
-                    icon=item.icon,
-                    name=item.name,
-                    statistic=statistic
-                    ))
-            else:
-                bigtask.append(BigTaskResult( 
-                    id=item.id,
-                    image="None",
-                    icon=item.icon,
-                    name=item.name,
-                    statistic=statistic
-                    ))
-
-        return bigtask
+                bigtask.filelink = f"/file?link={db.link}"
+            
+            bigtasks.append(bigtask)
+        
+        return bigtasks

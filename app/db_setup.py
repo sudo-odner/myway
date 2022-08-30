@@ -1,4 +1,4 @@
-from sqlalchemy import LargeBinary, create_engine, Column, Integer, String, Float, DateTime, Date
+from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
 engine = create_engine(
@@ -36,7 +36,7 @@ class User(Base, BaseRepr):
 
     name = Column(String)
     birthday = Column(DateTime)
-    image = Column(String)
+    filelink = Column(String)
 
     last_using = Column(DateTime)
 
@@ -53,7 +53,7 @@ class Task(Base, BaseRepr):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer)
 
-    big_task_id = Column(Integer)
+    bigtask_id = Column(Integer)
     task = Column(String)
     date = Column(DateTime)
 
@@ -67,7 +67,7 @@ class BigTask(Base, BaseRepr):
     
     icon = Column(String)
     name = Column(String)
-    image = Column(String)
+    filelink = Column(String)
 
 
 class TimeLinkGetImage(Base, BaseRepr):
