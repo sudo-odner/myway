@@ -33,7 +33,7 @@ def print_element(data):
 def cheak_user_session(session):
     user_session = DB.get_first_filter(User_session, search=(User_session.session == session))
     if user_session == None:
-        raise HTTPException(status_code=423, detail="The session is inactive or has been deleted due to a long period of inactivity")
+        raise HTTPException(status_code=403, detail="The session is inactive or has been deleted due to a long period of inactivity")
     DB.using_app(user_session)
 
     return user_session

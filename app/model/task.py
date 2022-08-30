@@ -1,5 +1,6 @@
 from typing import List
 from pydantic import BaseModel
+from app.model.bigtask import BigTaskModel
 from app.model.model import DateModel
 
 class DateModelmin(BaseModel):
@@ -22,12 +23,6 @@ class GetTaskModel(BaseModel):
     date_end: DateModelmax
 
 
-
-class BigTaskModel(BaseModel):
-    id: int
-    icon: str
-    name: str
-    filelink: str = 'null'
 
 class TaskModel(BaseModel):
     id: int

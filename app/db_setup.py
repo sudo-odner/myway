@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 
 engine = create_engine(
@@ -57,7 +57,7 @@ class Task(Base, BaseRepr):
     task = Column(String)
     date = Column(DateTime)
 
-    completed = Column(Integer)
+    completed = Column(Boolean)
 
 
 class BigTask(Base, BaseRepr):

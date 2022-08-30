@@ -1,39 +1,32 @@
-from email.mime import image
-from pyexpat import model
-from uuid import uuid4
-import datetime
 from app.db_setup import Task, BigTask, TimeLinkGetImage, User, User_session
 
-import hashlib
+from app.model.task import TaskModel
+from app.model.bigtask import BigTaskModel
 
+from uuid import uuid4
+import datetime
 import random
 import string
-from app.model.statistic import DayStatistic
-from pydantic import BaseModel
-from app.model.task import BigTaskModel, TaskModel
+from help_func import _hash
 
-from app.model.tasksdf import BigTaskResult, TaskResult
-
-
-_hash = lambda x : hashlib.md5((x).encode()).hexdigest()
-
-def get_statistic(data):
-    statistic = []
-    for item in data:
-        flag = True
-        for element in statistic:
-            if element['date'] == str(item.date):
-                element['all'] += 1
-                if item.completed == 1:
-                    element['done'] += 1
-                flag = False
+# def get_statistic(data):
+#     statistic = []
+#     for item in data:
+#         flag = True
+#         for element in statistic:
+#             if element['date'] == str(item.date):
+#                 element['all'] += 1
+#                 if item.completed == 1:
+#                     element['done'] += 1
+#                 flag = False
         
-        if flag:
-            one_day = {"all": 1, "done": 0, "date": str(item.date)}
-            if item.completed == 1:
-                one_day["done"] += 1
+#         if flag:
+#             one_day = {"all": 1, "done": 0, "date": str(item.date)}
+#             if item.completed == 1:
+#                 one_day["done"] += 1
     
-    return list(map(lambda kwargs: DayStatistic(**kwargs), statistic))
+#     return list(map(lambda kwargs: DayStatistic(**kwargs), statistic))
+    
 
 def add_linc_to_imag(file):
     link = str(uuid4().hex)
@@ -140,7 +133,7 @@ class DBActivate():
         for element in db_table:
             task = TaskModel(id=element.id, name=element.name, date=str(element.date), completed=element.completed)
 
-            bigtask = session.query(BigTask).filter(BigTask.id == element.big_task_id).first()
+            bigtask = session.query(BigTask).filter(BigTask.id == element.bigtask_id).first()
             if bigtask != -1:
                 db = add_linc_to_imag(bigtask.filelink)
                 session.add(db)
