@@ -27,7 +27,7 @@ def upload_file_profile(session: str, id: int, file: UploadFile = File(...)):
     if DB.get_first_filter(BigTask, search=(BigTask.id == id)) == None or user_session.user_id != (DB.get_first_filter(BigTask, search=(BigTask.id == id))).user_id:
         raise HTTPException(status_code=404, detail='Such target does not exist or is not available')
     
-    way = f"./app/file/big_task/{user_session.user_id}.{file_type(file)}"
+    way = f"./app/file/bigtask/{user_session.user_id}.{file_type(file)}"
     
     with open(way, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
