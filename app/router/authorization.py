@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from app.db_setup import User, engine
 from app.db_use import DBActivate
 
-from app.model.model import SessionID
+from app.model.model import IDResult
 from app.model.authorization import LoginModel, RegistedModel
 
 from app.help_func import object_to_datetime, _hash
@@ -28,7 +28,7 @@ def cheak_email(email: EmailStr):
 
 ########################################################### Регистрация
 
-@router.post("/registed", response_model=SessionID)
+@router.post("/registed", response_model=IDResult)
 def registed(_app:RegistedModel):
     if DB.get_first_filter(User, search=(User.email == _app.email)) is not None:
         raise HTTPException(status_code=423, detail="This mail is registered")
@@ -36,11 +36,11 @@ def registed(_app:RegistedModel):
     date = object_to_datetime(_app.birthday)
     user_id = DB.new_user(email=_app.email, password=_app.password, name=_app.name, birthday=date)
 
-    return SessionID(session=(DB.new_session(user_id, "patient")).session)
+    return IDResult(session=(DB.new_session(user_id, "patient")).session)
 
 ########################################################### Авторизация
 
-@router.post("/login", response_model=SessionID)
+@router.post("/login", response_model=IDResult)
 def login(_app: LoginModel):
     user = DB.get_first_filter(User, search=(User.email == _app.email))
     if user is None:
@@ -52,4 +52,4 @@ def login(_app: LoginModel):
     user_session = DB.new_session(user.id, user.role)
     DB.using_app(user_session)
     
-    return SessionID(session=user_session.session)
+    return IDResult(session=user_session.session)

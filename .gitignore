@@ -3,6 +3,11 @@ venv
 .DS_Store
 My-way.session.sql
 
+app/router/__pycache__
+app/__pycache__
+app/model/__pycache__
+app/other/__pycache__
+
 
 
 app/image/big_task/*.png

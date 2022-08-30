@@ -5,9 +5,12 @@ from app.model.bigtask import BigTaskModel
 
 from uuid import uuid4
 import datetime
+import hashlib
 import random
 import string
-from help_func import _hash
+
+# Функция хеширования
+_hash = lambda x : hashlib.md5((x).encode()).hexdigest()
 
 # def get_statistic(data):
 #     statistic = []
