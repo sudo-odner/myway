@@ -19,6 +19,7 @@ app = FastAPI()
 DBSession = sessionmaker(engine)
 DB = DBActivate(DBSession)
 
+
 # Получение файла
 @app.get("/file", response_class=FileResponse)
 async def get_file(link: str):
