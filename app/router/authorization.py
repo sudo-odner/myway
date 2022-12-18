@@ -36,7 +36,7 @@ def registed(_app:RegistedModel):
     date = object_to_datetime(_app.birthday)
     user_id = DB.new_user(email=_app.email, password=_app.password, name=_app.name, birthday=date)
 
-    return IDResult(session=(DB.new_session(user_id, "patient")).session)
+    return IDResult(id=(user_id))
 
 ########################################################### Авторизация
 
@@ -52,4 +52,4 @@ def login(_app: LoginModel):
     user_session = DB.new_session(user.id, user.role)
     DB.using_app(user_session)
     
-    return IDResult(session=user_session.session)
+    return IDResult(id=user_session.session)
