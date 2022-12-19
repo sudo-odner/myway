@@ -103,9 +103,8 @@ class DBActivate():
         user = User_session(user_id=id, last_using=date_now, session=_session_)
         session.add(user)
         session.commit()
-        user.id
 
-        return user
+        return user.session
         
     @DBDecorator
     def new_user(email, password, name, birthday, session=None):
