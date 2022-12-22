@@ -24,7 +24,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=jsonable_encoder({"detail": 'lox'}),
+        content=jsonable_encoder({"detail": 'Это не почта а хуй на блюде'}),
     )
 
 

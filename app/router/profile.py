@@ -11,7 +11,6 @@ router = APIRouter()
 def upload_file_profile(session: str, file: UploadFile = File(...)):
     user_session = cheak_user_session(session)
     
-    print(file.content_type)
     way = f"./app/file/user/{user_session.user_id}.{file.content_type}"
     
     with open(way, "wb") as buffer:
