@@ -5,11 +5,6 @@ from app.model.authorization import LoginModel, RegistedModel, SessionOutModel
 from pydantic import EmailStr
 import hashlib
 
-from fastapi import FastAPI, Request, status
-from fastapi.encoders import jsonable_encoder
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-
 
 router = APIRouter()
 _hash = lambda x : hashlib.md5((x).encode()).hexdigest()
@@ -21,14 +16,6 @@ _hash = lambda x : hashlib.md5((x).encode()).hexdigest()
 # def cheak_email(email: EmailStr):
 #     if DB.get_first_filter(User_profile, search=(User_profile.email == email)) is not None:
 #         raise HTTPException(status_code=406, detail="Почта зарегистрирована")
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=jsonable_encoder({"detail": 'lox'}),
-    )
 
 ########################################################### Регистрация
 @router.post("/registed", response_model=SessionOutModel)
