@@ -27,8 +27,8 @@ class BaseRepr():
 
 Base = declarative_base()
 
-class User(Base, BaseRepr):
-    __tablename__ = 'user'
+class User_profile(Base, BaseRepr):
+    __tablename__ = 'user_profile'
     id = Column(Integer, primary_key=True)
     email = Column(String)
     hashpass = Column(String)

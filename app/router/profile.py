@@ -1,20 +1,17 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from sqlalchemy.orm import sessionmaker
 
-from app.db_setup import User, engine
-from app.db_use import DBActivate
+from app.db_setup import User_profile
+from app import DB, object_to_datetime, cheak_user_session
 
 from app.model.profile import EditProfileModel, ProfileModel
 
-from app.help_func import object_to_datetime, cheak_user_session, file_type
+from app.help_func import cheak_user_session, file_type
 import shutil
 
 router = APIRouter()
 
-# Работа с Базой Данных
-DBSession = sessionmaker(engine)
-DB = DBActivate(DBSession)
-
+file_type = lambda x: (x.filename).split('.')[1]
 
 ########################################################### Загрузка файла в профиль
 

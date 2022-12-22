@@ -1,4 +1,4 @@
-from app.db_setup import Task, BigTask, TimeLinkGetImage, User, User_session
+from app.db_setup import Task, BigTask, TimeLinkGetImage, User_profile, User_session
 
 from app.model.task import TaskModel
 from app.model.bigtask import BigTaskModel
@@ -40,12 +40,12 @@ def add_linc_to_imag(file):
     return db
 
 
-class DBActivate():
+class DB_Activate():
     def __init__(self, session) -> None:
         self.session = session
     
-    def DBDecorator(func):
-        def DBUSe(self, *args, **kwargs):
+    def db_decorator(func):
+        def db_use(self, *args, **kwargs):
             result = None
             session = None
 
@@ -59,35 +59,35 @@ class DBActivate():
             if session is not None:
                 session.close()
             return result
-        return DBUSe
+        return db_use
     
-    @DBDecorator
+    @db_decorator
     def get_first_filter(db_table, session=None, search=()):
         return session.query(db_table).filter(search).first()
     
-    @DBDecorator
+    @db_decorator
     def get_all_filter(db_table, session=None, search=()):
         return session.query(db_table).filter(search).all()
     
-    @DBDecorator
+    @db_decorator
     def add(db_table, session=None):
         session.add(db_table)
         session.commit()
         return db_table.id
     
-    @DBDecorator
+    @db_decorator
     def update(db_table, reload={}, session=None, search=()):
         session.query(db_table).filter(search).update(reload)
         session.commit()
     
-    @DBDecorator
+    @db_decorator
     def dell(db_table, session=None, search=()):
         db_list = session.query(db_table).filter(search).all()
         for db in db_list:
             session.delete(db)
         session.commit()
     
-    @DBDecorator
+    @db_decorator
     def getlinkimage(file, session=None):
         db = add_linc_to_imag(file)
         session.add(db)
@@ -95,40 +95,41 @@ class DBActivate():
         return f"/file?link={db.link}"
 
 
-    @DBDecorator
+    @db_decorator
     def new_session(id, session=None):
-        _session_ = uuid4().hex
-
         date_now = datetime.datetime.now(datetime.timezone.utc)
-        user = User_session(user_id=id, last_using=date_now, session=_session_)
+        user = User_session(user_id=id, last_using=date_now, session=(uuid4().hex))
         session.add(user)
         session.commit()
 
         return user.session
         
-    @DBDecorator
+    @db_decorator
     def new_user(email, password, name, birthday, session=None):
+        date_now = datetime.datetime.now(datetime.timezone.utc)
         _salt = ''.join(random.choice(string.ascii_letters) for x in range(30))
         _hashpass = _hash(password + _salt)
 
-        db_table = User(email=email, hashpass=_hashpass, salt=_salt, name=name, birthday=birthday)
+        db_user = User_profile(email=email, hashpass=_hashpass, salt=_salt, name=name, birthday=birthday, last_using=date_now)
+        db_user_session = User_session(user_id=db_user.id, last_using=date_now, session=(uuid4().hex))
 
-        session.add(db_table)
+        session.add(db_user)
+        session.add(db_user_session)
         session.commit()
 
-        return db_table.id
+        return db_user_session.session
     
-    @DBDecorator
-    def using_app(user_session, session=None):
-        db_user = session.query(User).filter_by( id=user_session.user_id ).first()
-        db_session = session.query(User_session).filter_by( session=user_session.session ).first()
+    @db_decorator
+    def time_update(user_session, session=None):
+        db_user = session.query(User_profile).filter_by(id=user_session.user_id).first()
+        db_session = session.query(User_session).filter_by(session=user_session.session).first()
         db_user.last_using = datetime.datetime.now(datetime.timezone.utc)
         db_session.last_using = datetime.datetime.now(datetime.timezone.utc)
         session.commit()    
     
     
     
-    @DBDecorator
+    @db_decorator
     def get_task(id, date_start, date_end, session=None):
         db_table = session.query(Task).filter(Task.user_id == id, date_start <= Task.date, Task.date <= date_end).all()
         tasks = []
@@ -148,7 +149,7 @@ class DBActivate():
         return tasks
     
 
-    @DBDecorator
+    @db_decorator
     def get_big_task(id, goal, session=None):
         if goal == -1:
             db_table = session.query(BigTask).filter(BigTask.user_id == id,).all()

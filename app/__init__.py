@@ -1,13 +1,13 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import sessionmaker
 from app.db_setup import User_session, engine
-from app.db_use import DBActivate
+from app.db_use import DB_Activate
 import datetime
 
 
 # Working with the Database
 DBSession = sessionmaker(engine)
-DB = DBActivate(DBSession)
+DB = DB_Activate(DBSession)
 
 # Convert json object to datetime
 object_to_datetime = lambda x: datetime.datetime(x.year, x.month, x.day, x.hours, x.minute)
