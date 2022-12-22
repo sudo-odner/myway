@@ -36,7 +36,7 @@ class User_profile(Base, BaseRepr):
 
     name = Column(String)
     birthday = Column(DateTime)
-    filelink = Column(String)
+    user_file = Column(String)
 
     last_using = Column(DateTime)
 

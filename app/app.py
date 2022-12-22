@@ -2,10 +2,10 @@ import datetime
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 
-from sqlalchemy.orm import sessionmaker
-from app.db_setup import TimeLinkGetImage, engine
+from app.db_setup import TimeLinkGetImage
 
-from app.db_use import DBActivate
+from app.db_use import DB_Activate
+from app import DB, object_to_datetime, cheak_user_session
 
 from app.router import authorization
 from app.router import profile
@@ -14,10 +14,6 @@ from app.router import bigtask
 
 
 app = FastAPI()
-
-# Работа с Базой Данных
-DBSession = sessionmaker(engine)
-DB = DBActivate(DBSession)
 
 
 # Получение файла

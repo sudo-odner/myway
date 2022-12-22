@@ -2,14 +2,15 @@ from fastapi import HTTPException
 from sqlalchemy.orm import sessionmaker
 
 from app.db_setup import User_session, engine
-from app.db_use import DBActivate
+from app.db_use import DB_Activate
+from app import DB
 
 import datetime
 import hashlib
 
-# Работа с Базой Данных
-DBSession = sessionmaker(engine)
-DB = DBActivate(DBSession)
+# # Работа с Базой Данных
+# DBSession = sessionmaker(engine)
+# DB = DBActivate(DBSession)
 
 # Функция позволяет посмотерть что пришло в приложение
 def print_element(data):
@@ -34,7 +35,7 @@ def cheak_user_session(session):
     user_session = DB.get_first_filter(User_session, search=(User_session.session == session))
     if user_session == None:
         raise HTTPException(status_code=403, detail="The session is inactive or has been deleted due to a long period of inactivity")
-    DB.using_app(user_session)
+    # DB.using_app(user_session)
 
     return user_session
 

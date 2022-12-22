@@ -111,9 +111,10 @@ class DB_Activate():
         _hashpass = _hash(password + _salt)
 
         db_user = User_profile(email=email, hashpass=_hashpass, salt=_salt, name=name, birthday=birthday, last_using=date_now)
-        db_user_session = User_session(user_id=db_user.id, last_using=date_now, session=(uuid4().hex))
-
         session.add(db_user)
+        session.commit()
+
+        db_user_session = User_session(user_id=db_user.id, last_using=date_now, session=(uuid4().hex))
         session.add(db_user_session)
         session.commit()
 

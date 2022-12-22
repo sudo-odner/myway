@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import and_
 
 from app.db_setup import BigTask, Task, engine
-from app.db_use import DBActivate
+from app.db_use import DB_Activate
 
 from app.model.task import AddTaskModel, GetTaskModel, ListTaskModel
 from app.model.model import IDResult, SessionAndID
@@ -14,7 +14,7 @@ router = APIRouter()
 
 # Работа с Базой Данных
 DBSession = sessionmaker(engine)
-DB = DBActivate(DBSession)
+DB = DB_Activate(DBSession)
 
 
 ########################################################### Получение цели

@@ -1,17 +1,12 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
-from sqlalchemy.orm import sessionmaker
+import shutil
 
 from app.db_setup import User_profile
 from app import DB, object_to_datetime, cheak_user_session
 
 from app.model.profile import EditProfileModel, ProfileModel
 
-from app.help_func import cheak_user_session, file_type
-import shutil
-
 router = APIRouter()
-
-file_type = lambda x: (x.filename).split('.')[1]
 
 ########################################################### Загрузка файла в профиль
 
@@ -19,12 +14,12 @@ file_type = lambda x: (x.filename).split('.')[1]
 def upload_file_profile(session: str, file: UploadFile = File(...)):
     user_session = cheak_user_session(session)
     
-    way = f"./app/file/user/{user_session.user_id}.{file_type(file)}"
+    way = f"./app/file/user/{user_session.user_id}.{((file.content_type).split('/'))[-1]}"
     
     with open(way, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    DB.update(User, search=(User.id == user_session.user_id), reload={"filelink": way})
+    DB.update(User_profile, search=(User_profile.id == user_session.user_id), reload={"user_file": way})
 
 
 ########################################################### Получение профиля
@@ -32,10 +27,10 @@ def upload_file_profile(session: str, file: UploadFile = File(...)):
 @router.get("/get-profile", response_model=ProfileModel)
 def get_profile(session: str):
     user_session = cheak_user_session(session)
-    user = DB.get_first_filter(User, search=(User.id == user_session.user_id))
+    user = DB.get_first_filter(User_profile, search=(User_profile.id == user_session.user_id))
     
-    if user.filelink != None:
-        user.filelink = DB.getlinkimage(user.filelink)
+    if user.user_file != None:
+        user.user_file = DB.getlinkimage(user.user_file)
     return ProfileModel(**user)
 
 
@@ -44,13 +39,13 @@ def get_profile(session: str):
 @router.get("/edit-profile")
 def get_profile(_app: EditProfileModel):
     user_session = cheak_user_session(_app.session)
-    user = DB.get_first_filter(User, search=(User.id == user_session.user_id))
+    user = DB.get_first_filter(User_profile, search=(User_profile.id == user_session.user_id))
 
     if _app.email != None:
-        if DB.get_first_filter(User, search=(User.email == _app.email)) is not None:
-            raise HTTPException(status_code=423, detail="Email is registed")
-        DB.update(User, search=(User.id == user.id), reload={"email": _app.email})
+        if DB.get_first_filter(User_profile, search=(User_profile.email == _app.email)) is not None:
+            raise HTTPException(status_code=423, detail="Почта зарегестрирована")
+        DB.update(User_profile, search=(User_profile.id == user.id), reload={"email": _app.email})
     if _app.name != None:
-        DB.update(User, search=(User.id == user.id), reload={"name": _app.name})
+        DB.update(User_profile, search=(User_profile.id == user.id), reload={"name": _app.name})
     if _app.birthday != None:
-        DB.update(User, search=(User.id == user.id), reload={"birthday": object_to_datetime(_app.birthday)})
+        DB.update(User_profile, search=(User_profile.id == user.id), reload={"birthday": object_to_datetime(_app.birthday)})

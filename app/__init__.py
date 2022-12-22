@@ -16,7 +16,7 @@ object_to_datetime = lambda x: datetime.datetime(x.year, x.month, x.day, x.hours
 def cheak_user_session(session):
     user_session = DB.get_first_filter(User_session, search=(User_session.session == session))
     if user_session == None:
-        raise HTTPException(status_code=423, detail="The session is inactive or has been deleted due to a long period of inactivity")
-    DB.using_app(user_session)
+        raise HTTPException(status_code=423, detail="Сессия неактивна или удалена из-за длительного периода бездействия")
+    DB.time_update(user_session)
 
     return user_session

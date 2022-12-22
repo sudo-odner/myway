@@ -13,11 +13,11 @@ _hash = lambda x : hashlib.md5((x).encode()).hexdigest()
 
 ########################################################### Элементы при регистрации
 
-# Проверка регистрации пользователя
-@router.get("/cheak-email")
-def cheak_email(email: EmailStr):
-    if DB.get_first_filter(User_profile, search=(User_profile.email == email)) is not None:
-        raise HTTPException(status_code=406, detail="Почта зарегистрирована")
+# # Проверка регистрации пользователя
+# @router.get("/cheak-email")
+# def cheak_email(email: EmailStr):
+#     if DB.get_first_filter(User_profile, search=(User_profile.email == email)) is not None:
+#         raise HTTPException(status_code=406, detail="Почта зарегистрирована")
 
 ########################################################### Регистрация
 

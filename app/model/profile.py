@@ -5,7 +5,17 @@ class ProfileModel(BaseModel):
     name: str
     email: EmailStr
     birthday: DateModel
-    filelink: str
+    user_file: str
+
+    class Config:
+        schema_extra  = {
+            'example': {
+                'name': 'Pidor',
+                'email': 'pigor@podors.com',
+                'birthay': 'date',
+                'user_file_link': '/file?link=aboba'
+            }
+        }
 
 class EditProfileModel(BaseModel):
     session: str
