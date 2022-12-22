@@ -4,6 +4,22 @@ from app.db_setup import User_session, engine
 from app.db_use import DB_Activate
 import datetime
 
+def print_element(data):
+    nl_char = '\n\t'
+    out = list()
+    for item, value in data.items():
+        if item != list(data.keys())[-1]:
+            if type(value) == int:
+                out.append(f"{item}: {value},")
+            else:
+                out.append(f"{item}: '{value}',")
+        else:
+            if type(value) == int:
+                out.append(f"{item}: {value}")
+            else:
+                out.append(f"{item}: '{value}'")
+
+    print('{\n\t' + nl_char.join(out) + "\n}")
 
 # Working with the Database
 DBSession = sessionmaker(engine)

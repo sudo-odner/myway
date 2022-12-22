@@ -1,14 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from app import DB, object_to_datetime
-
 from app.db_setup import User_profile
 from app.model.authorization import LoginModel, RegistedModel, SessionOutModel
 from pydantic import EmailStr
-
 import hashlib
 
-router = APIRouter()
 
+router = APIRouter()
 _hash = lambda x : hashlib.md5((x).encode()).hexdigest()
 
 ########################################################### Элементы при регистрации
@@ -20,7 +18,6 @@ _hash = lambda x : hashlib.md5((x).encode()).hexdigest()
 #         raise HTTPException(status_code=406, detail="Почта зарегистрирована")
 
 ########################################################### Регистрация
-
 @router.post("/registed", response_model=SessionOutModel)
 def registed(_app: RegistedModel):
     if DB.get_first_filter(User_profile, search=(User_profile.email == _app.email)) is not None:
@@ -32,7 +29,6 @@ def registed(_app: RegistedModel):
     return SessionOutModel(session=user_session)
 
 ########################################################### Авторизация
-
 @router.post("/login", response_model=SessionOutModel)
 def login(_app: LoginModel):
     db_user = DB.get_first_filter(User_profile, search=(User_profile.email == _app.email))
