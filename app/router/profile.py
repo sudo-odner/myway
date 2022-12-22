@@ -11,7 +11,8 @@ router = APIRouter()
 def upload_file_profile(session: str, file: UploadFile = File(...)):
     user_session = cheak_user_session(session)
     
-    way = f"./app/file/user/{user_session.user_id}.{((file.content_type).split('/'))[-1]}"
+    print(file.content_type)
+    way = f"./app/file/user/{user_session.user_id}.{file.content_type}"
     
     with open(way, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
@@ -27,7 +28,7 @@ def get_profile(session: str):
     if user.user_file != None:
         user.user_file = DB.getlinkimage(user.user_file)
     return ProfileModel(**user)
-    
+
 ########################################################### Изменнение профиля
 @router.get("/edit-profile")
 def get_profile(_app: EditProfileModel):
